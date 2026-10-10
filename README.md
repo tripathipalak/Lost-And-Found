@@ -1,232 +1,104 @@
-# Lost and Found
+# Lost & Found
 
-A web-based platform to help users report and track lost and found items in their community (University Campuses, Neighborhoods, Hostels).
+A web platform for reporting and recovering lost items on campuses, hostels and neighbourhoods. Items are matched automatically, and every found item is verified by an admin before the owner is notified.
 
 ## Features
 
-- User authentication and authorization
-- Report lost items with descriptions and details
-- Report found items with descriptions and details
-- Search and filter items by category, date, and location
-- Match lost items with found items
-- Contact system for item claims
-- User dashboard to manage reports
-- Admin panel for managing users and items
+- JWT-based authentication with user and admin roles
+- Report lost and found items with category, description, location and image upload
+- Automatic matching of lost and found items with a match score
+- Admin verification: finders hand the item over at the admin room, and the admin confirms it
+- Email notifications (Nodemailer) to finders and owners
+- User dashboard to manage own reports and profile
+- Admin dashboard to verify items, review matches and view all items
+
+## How it works
+
+1. A user reports a lost item or a found item.
+2. For found items, the finder gets an email asking to submit the item at the admin room.
+3. The admin verifies the item, and it becomes active for matching.
+4. The matcher scores lost and found items, and the owner is emailed about a possible match.
+5. The admin confirms the claim.
 
 ## Tech Stack
 
-**Backend:** Node.js, Express.js, MongoDB  
-**Frontend:** HTML5, CSS3, JavaScript
+**Backend:** Node.js, Express.js, MongoDB (Mongoose), JWT, Multer, Nodemailer
+**Frontend:** HTML5, CSS3, Vanilla JavaScript (ES modules)
 
 ## Project Structure
 
 ```
 Lost-And-Found/
-├── backend/           # Server-side application
-│   ├── models/        # Database schemas
-│   ├── routes/        # API endpoints
-│   ├── controllers/   # Business logic
-│   ├── middleware/    # Authentication & validation
-│   └── server.js      # Main server file
-├── frontend/          # Client-side application
-│   ├── css/           # Stylesheets
-│   ├── js/            # JavaScript files
-│   ├── pages/         # HTML pages
-│   └── assets/        # Images and static files
-└── .gitignore
+├── backend/
+│   ├── src/
+│   │   ├── config/        # DB connection
+│   │   ├── controllers/   # Auth and item logic
+│   │   ├── middlewares/   # Auth and error handling
+│   │   ├── models/        # User, Items
+│   │   ├── routes/
+│   │   ├── utils/         # matcher, notify (email), upload
+│   │   └── server.js
+│   └── uploads/           # Uploaded images (git-ignored)
+└── frontend/
+    ├── css/
+    ├── js/
+    └── *.html
 ```
 
-## Prerequisites
+## Getting Started
 
-- Node.js (v14 or higher)
-- MongoDB (local or Atlas)
-- npm or yarn
+**Prerequisites:** Node.js 18+, MongoDB (local or Atlas)
 
-## Installation
-
-### Backend Setup
-
-1. Navigate to backend directory
 ```bash
 cd backend
-```
-
-2. Install dependencies
-```bash
 npm install
 ```
 
-3. Create `.env` file
+Create `backend/.env`:
+
 ```env
 PORT=5000
 MONGODB_URI=mongodb://localhost:27017/lost-and-found
-JWT_SECRET=your_secret_key
-JWT_EXPIRE=7d
+JWT_SECRET=use_a_long_random_string
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your_email
+EMAIL_PASS=your_app_password
+FROM_EMAIL=your_email
 ```
 
-4. Start the server
 ```bash
 npm start
 ```
 
-Server runs on `http://localhost:5000`
+Serve the frontend in another terminal:
 
-### Frontend Setup
-
-1. Navigate to frontend directory
 ```bash
 cd frontend
-```
-
-2. Serve with a static server
-
-**Using Python:**
-```bash
-python -m http.server 8000
-```
-
-**Using Node.js:**
-```bash
 npx http-server -p 8000
 ```
 
-3. Access the application
-```
-http://localhost:8000
-```
+Open `http://localhost:8000`.
 
-## Configuration
+## API (overview)
 
-Update API endpoint in frontend JavaScript files if needed:
-```javascript
-const API_URL = 'http://localhost:5000/api';
-```
+| Area | Examples |
+|------|----------|
+| Auth | `POST /api/auth/register`, `POST /api/auth/login` |
+| Items | `GET/POST /api/items`, `GET /api/items/:id/matches` |
 
-## Usage
+## Security
 
-### For Users
+- Passwords hashed with bcrypt
+- JWT-protected routes and role checks for admin actions
+- Secrets kept in `.env` (never committed)
 
-1. Register or login to your account
-2. Report a lost item with details (category, description, date, location)
-3. Browse found items to see if your item has been reported
-4. Report a found item if you found something
-5. Contact the person who reported a matching item
-6. Manage your reports from the dashboard
+## Future Improvements
 
-### For Administrators
+- Image-based matching
+- In-app chat between finder and owner
+- Deployed live demo
 
-1. Login with admin credentials
-2. Access admin dashboard
-3. Manage users and their permissions
-4. Review and moderate item reports
-5. Handle disputes and claims
-6. Monitor platform activity
+## Author
 
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/me` - Get current user
-
-### Lost Items
-- `POST /api/lost-items` - Create lost item report
-- `GET /api/lost-items` - Get all lost items
-- `GET /api/lost-items/:id` - Get single lost item
-- `PUT /api/lost-items/:id` - Update lost item
-- `DELETE /api/lost-items/:id` - Delete lost item
-
-### Found Items
-- `POST /api/found-items` - Create found item report
-- `GET /api/found-items` - Get all found items
-- `GET /api/found-items/:id` - Get single found item
-- `PUT /api/found-items/:id` - Update found item
-- `DELETE /api/found-items/:id` - Delete found item
-
-### Claims
-- `POST /api/claims` - Submit item claim
-- `GET /api/claims` - Get user claims
-- `PUT /api/claims/:id` - Update claim status
-
-## Database Schema
-
-### User Model
-```javascript
-{
-  name: String,
-  email: String,
-  password: String (hashed),
-  role: String (user/admin),
-  createdAt: Date
-}
-```
-
-### Lost Item Model
-```javascript
-{
-  user: ObjectId (ref: User),
-  category: String,
-  title: String,
-  description: String,
-  date: Date,
-  location: String,
-  status: String (active/claimed/closed),
-  createdAt: Date
-}
-```
-
-### Found Item Model
-```javascript
-{
-  user: ObjectId (ref: User),
-  category: String,
-  title: String,
-  description: String,
-  date: Date,
-  location: String,
-  imageUrl: String,
-  status: String (active/claimed/closed),
-  createdAt: Date
-}
-```
-
-## Security Features
-
-- Password hashing with bcrypt
-- JWT token authentication
-- Protected API routes
-- Input validation and sanitization
-- CORS configuration
-- Environment variable management
-
-## Troubleshooting
-
-**MongoDB Connection Error**
-- Ensure MongoDB is running
-- Verify connection string in `.env`
-
-**CORS Issues**
-- Check backend CORS configuration
-- Verify frontend API URL matches backend
-
-**Authentication Fails**
-- Clear browser cache and localStorage
-- Check JWT token validity
-- Verify credentials
-
-**Port Already in Use**
-- Change PORT in `.env` file
-- Kill existing process on the port
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/new-feature`)
-3. Commit changes (`git commit -m 'Add new feature'`)
-4. Push to branch (`git push origin feature/new-feature`)
-5. Open a Pull Request
-
-
-## Contact
-
-For issues and questions, please open an issue in the repository.
+**Palak Mani Tripathi**: [GitHub](https://github.com/tripathipalak) · [LinkedIn](https://www.linkedin.com/in/palak-mani-tripathi/)
