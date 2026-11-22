@@ -98,7 +98,7 @@ Create `backend/.env`:
 
 ```env
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/lost-and-found
+MONGODB_URL=mongodb://localhost:27017/lost-and-found
 JWT_SECRET=use_a_long_random_string
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
